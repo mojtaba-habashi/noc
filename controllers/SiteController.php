@@ -2,10 +2,8 @@
 
 namespace app\controllers;
 
-use app\models\User2;
 use Yii;
 use yii\filters\AccessControl;
-use yii\httpclient\Message;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -66,6 +64,11 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
+    public function actionError($message)
+    {
+        return $this->render('error');
+    }
+
     /**
      * Login action.
      *
@@ -73,15 +76,17 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
-
-        $model = new User2();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-
-            return $this->render('/login',['model'=>$model,]);
-
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
         }
 
-        return $this->render('/userprofile', [
+        $model = new LoginForm();
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goBack();
+        }
+
+        $model->password = '';
+        return $this->render('login', [
             'model' => $model,
         ]);
     }

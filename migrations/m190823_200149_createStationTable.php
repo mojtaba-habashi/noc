@@ -3,18 +3,20 @@
 use yii\db\Migration;
 
 /**
- * Handles the creation of table `service_type`.
+ * Handles the creation of table `{{%station}}`.
  */
-class m180805_151139_create_service_type_table extends Migration
+class m190823_200149_createStationTable extends Migration
 {
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-        $this->createTable('service_type', [
+        $this->createTable('{{%station}}', [
             'id' => $this->primaryKey(),
             'name' => $this->string(),
+            'address' => $this->string(),
+            'station_type' => $this->string(),
         ]);
     }
 
@@ -23,6 +25,6 @@ class m180805_151139_create_service_type_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('service_type');
+        $this->dropTable('{{%station}}');
     }
 }

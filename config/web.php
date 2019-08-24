@@ -12,25 +12,24 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
-        'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'ycYzj1_LUaPnWOzhkVLGrTcmBxlL3C0B',
-        ],
-       /* 'view' => [
-        'theme' => [
-            'pathMap' => [
-                '@dektrium/user/views' => '@app/views/user'
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                    '@dektrium/user/views' => '@app/views/user'
+                ],
             ],
         ],
-    ],*/
-
+        'request' => [
+            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
+            'cookieValidationKey' => 'Poe-unmf52XQTq_em65VCmBrFG8OjJSQ',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
-        /*'user' => [
-            'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
-        ],*/
+//        'user' => [
+//            'identityClass' => 'app\models\User',
+//            'enableAutoLogin' => true,
+//        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
@@ -51,24 +50,28 @@ $config = [
             ],
         ],
         'db' => $db,
-
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-
     ],
     'params' => $params,
     'modules' => [
         'user' => [
             'class' => 'dektrium\user\Module',
+            'enableUnconfirmedLogin' => true,
+            'modelMap' => [
+                'User' => 'app\models\User',
+                'Profile' => 'app\models\Profile',
+                'RegistrationForm' => 'app\models\RegistrationForm',
+            ],
             'controllerMap' => [
                 'registration' => 'app\controllers\user\RegistrationController'
             ],
+        ],
     ],
-],
 ];
 
 if (YII_ENV_DEV) {

@@ -2,103 +2,117 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use dektrium\user\helpers\Password;
+use dektrium\user\models\Profile;
+use yii\db\Exception;
+use yii\helpers\ArrayHelper;
+use yii\web\Application as WebApplication;
+
+class User extends \dektrium\user\models\User
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
 
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function findIdentity($id)
+    public function beforeSave($insert)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
+        if ($insert) {
+            $this->setAttribute('auth_key', \Yii::$app->security->generateRandomString());
+            if (\Yii::$app instanceof WebApplication) {
+                $this->setAttribute('registration_ip', \Yii::$app->request->userIP);
             }
         }
-
-        return null;
-    }
-
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
-    {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
+        if (!empty($this->password)) {
+            $this->setAttribute('password_hash', Password::hash($this->password));
         }
 
-        return null;
+        return parent::beforeSave($insert);
+    }
+    public function attributeLabels()
+    {
+        return [
+            'username'          => \Yii::t('user', 'Username'),
+            'email'             => \Yii::t('user', 'Email'),
+            'registration_ip'   => \Yii::t('user', 'Registration ip'),
+            'unconfirmed_email' => \Yii::t('user', 'New email'),
+            'password'          => \Yii::t('user', 'Password'),
+            'created_at'        => \Yii::t('user', 'Registration time'),
+            'last_login_at'     => \Yii::t('user', 'Last login'),
+            'confirmed_at'      => \Yii::t('user', 'Confirmation time'),
+        ];
+    }
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        return ArrayHelper::merge($scenarios, [
+            'register' => ['username', 'email', 'password', 'is_admin'],
+            'connect'  => ['username', 'email'],
+            'create'   => ['username', 'email', 'password'],
+            'update'   => ['username', 'email', 'password'],
+            'settings' => ['username', 'email', 'password'],
+        ]);
+    }
+    public function rules()
+    {
+        return [
+            [['is_admin'], 'required'],
+            [['is_admin'], 'integer'],
+            [['password'], 'required'],
+            // username rules
+            'usernameTrim'     => ['username', 'trim'],
+            'usernameRequired' => ['username', 'required', 'on' => ['register', 'create', 'connect', 'update']],
+            'usernameMatch'    => ['username', 'match', 'pattern' => static::$usernameRegexp],
+            'usernameLength'   => ['username', 'string', 'min' => 3, 'max' => 255],
+            'usernameUnique'   => [
+                'username',
+                'unique',
+                'message' => \Yii::t('user', 'This username has already been taken')
+            ],
+
+            // email rules
+            'emailTrim'     => ['email', 'trim'],
+            'emailRequired' => ['email', 'required', 'on' => ['register', 'connect', 'create', 'update']],
+            'emailPattern'  => ['email', 'email'],
+            'emailLength'   => ['email', 'string', 'max' => 255],
+            'emailUnique'   => [
+                'email',
+                'unique',
+                'message' => \Yii::t('user', 'This email address has already been taken')
+            ],
+
+        ];
+    }
+
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function checkAdminExist ()
+    {
+        $users = User::find()->where(['is_admin' => 1])->all();
+        if (count($users) == 0) {
+            return true;
+        } else {
+            throw new Exception('admin exist');
+        }
     }
 
     /**
-     * {@inheritdoc}
+     * @param $user
+     * @param $profile
+     * @throws Exception
      */
-    public function getId()
+    public function generateUser ($user, $profile)
     {
-        return $this->id;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAuthKey()
-    {
-        return $this->authKey;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validateAuthKey($authKey)
-    {
-        return $this->authKey === $authKey;
-    }
-
-    /**
-     * Validates password
-     *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
-     */
-    public function validatePassword($password)
-    {
-        return $this->password === $password;
+        if ($user->save()) {
+            $new_profile = \app\models\Profile::find()->where(['user_id' => $user->id])->one();
+            $new_profile->name = $profile->name;
+            $new_profile->family = $profile->family;
+            $new_profile->number = $profile->number;
+            if (!$new_profile->save()) {
+                throw new Exception('can not save profile');
+            }
+        } else {
+            throw new Exception('can not save user');
+        }
     }
 }

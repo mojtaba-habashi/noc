@@ -20,6 +20,7 @@ use yii\widgets\ActiveForm;
 
 $this->title = Yii::t('user', 'Sign up');
 $this->params['breadcrumbs'][] = $this->title;
+$user->is_admin = 1;
 ?>
 <div class="row">
     <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
@@ -30,20 +31,20 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="panel-body">
                 <?php $form = ActiveForm::begin([
                     'id' => 'registration-form',
-                    'enableAjaxValidation' => true,
-                    'enableClientValidation' => false,
                 ]); ?>
 
-                <?= $form->field($model, 'email') ?>
+                <?= $form->field($user, 'email')->label('Email') ?>
 
+                <?= $form->field($user, 'username')->label('User Name') ?>
+                <?= $form->field($user, 'is_admin')->hiddenInput()->label('') ?>
 
-                <?= $form->field($model, 'username') ?>
-                <?= $form->field($model, 'username') ?>
-                <?= $form->field($model, 'username') ?>
+                <?= $form->field($profile, 'name')->label('Name') ?>
 
-                <?php if ($module->enableGeneratingPassword == false): ?>
-                    <?= $form->field($model, 'password')->passwordInput() ?>
-                <?php endif ?>
+                <?= $form->field($profile, 'family')->label('Family') ?>
+
+                <?= $form->field($profile, 'number')->label('Number') ?>
+
+                <?= $form->field($user, 'password')->passwordInput()->label('Password') ?>
 
                 <?= Html::submitButton(Yii::t('user', 'Sign up'), ['class' => 'btn btn-success btn-block']) ?>
 
