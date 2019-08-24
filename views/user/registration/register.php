@@ -36,15 +36,17 @@ $user->is_admin = 1;
                 <?= $form->field($user, 'email')->label('Email') ?>
 
                 <?= $form->field($user, 'username')->label('User Name') ?>
-                <?= $form->field($user, 'is_admin')->hiddenInput()->label('') ?>
 
-                <?= $form->field($profile, 'name')->label('Name') ?>
+                <?= $form->field($user, 'password')->passwordInput()->label('Password') ?>
 
-                <?= $form->field($profile, 'family')->label('Family') ?>
+                <?= $form->field($profile, 'name')->label('FirstName') ?>
+
+                <?= $form->field($profile, 'family')->label('LastName') ?>
 
                 <?= $form->field($profile, 'number')->label('Number') ?>
 
-                <?= $form->field($user, 'password')->passwordInput()->label('Password') ?>
+
+                <?= $form->field($user, 'is_admin')->hiddenInput()->label('') ?>
 
                 <?= Html::submitButton(Yii::t('user', 'Sign up'), ['class' => 'btn btn-success btn-block']) ?>
 
