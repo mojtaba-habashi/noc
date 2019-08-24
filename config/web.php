@@ -68,7 +68,8 @@ $config = [
                 'RegistrationForm' => 'app\models\RegistrationForm',
             ],
             'controllerMap' => [
-                'registration' => 'app\controllers\user\RegistrationController'
+                'registration' => 'app\controllers\user\RegistrationController',
+                'customer' => 'app\controllers\user\CustomerController'
             ],
         ],
     ],
