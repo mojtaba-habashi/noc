@@ -4,6 +4,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\Usersearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -27,23 +28,29 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
             'id',
             'username',
             'email:email',
-            'password_hash',
-            'auth_key',
+            //'password_hash',
+            //'auth_key',
             //'confirmed_at',
             //'unconfirmed_email:email',
             //'blocked_at',
-            //'registration_ip',
+            'registration_ip',
             //'created_at',
             //'updated_at',
             //'flags',
             //'last_login_at',
             //'is_admin',
-
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete} {myButton}',  // the default buttons + your custom button
+                'buttons' => [
+                    'myButton' => function($url, $model, $key) {     // render your custom button
+                        return "<span class='fa fa-book bg-red'>" . Html::a('Click me', ['site/index']) . "</span>";
+                    }
+                ]
+            ]
         ],
     ]); ?>
 

@@ -4,6 +4,7 @@ namespace app\controllers\user;
 
 use app\models\SearchUser;
 use Yii;
+use yii\base\Model;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
