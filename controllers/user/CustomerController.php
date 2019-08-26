@@ -23,10 +23,10 @@ class CustomerController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['list-customers'],
+                'only' => ['index'],
                 'rules' => [
                     [
-                        'actions' => ['list-customers'],
+                        'actions' => ['index'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],

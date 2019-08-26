@@ -4,12 +4,12 @@ namespace app\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Station;
+use app\models\Service;
 
 /**
- * Stationsearch represents the model behind the search form of `app\models\Station`.
+ * Servicesearch represents the model behind the search form of `app\models\Service`.
  */
-class Stationsearch extends Station
+class Servicesearch extends Service
 {
     /**
      * {@inheritdoc}
@@ -17,9 +17,8 @@ class Stationsearch extends Station
     public function rules()
     {
         return [
-            [['id', 'is_used'], 'integer'],
-            [['name', 'address', 'station_type'], 'safe'],
-
+            [['id', 'user_id', 'station_id', 'is_deleted'], 'integer'],
+            [['service_type', 'address', 'tel'], 'safe'],
         ];
     }
 
@@ -41,7 +40,7 @@ class Stationsearch extends Station
      */
     public function search($params)
     {
-        $query = Station::find();
+        $query = Service::find();
 
         // add conditions that should always apply here
 
@@ -60,12 +59,14 @@ class Stationsearch extends Station
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'is_used' => $this->is_used,
+            'user_id' => $this->user_id,
+            'station_id' => $this->station_id,
+            'is_deleted' => $this->is_deleted,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
+        $query->andFilterWhere(['like', 'service_type', $this->service_type])
             ->andFilterWhere(['like', 'address', $this->address])
-            ->andFilterWhere(['like', 'station_type', $this->station_type]);
+            ->andFilterWhere(['like', 'tel', $this->tel]);
 
         return $dataProvider;
     }

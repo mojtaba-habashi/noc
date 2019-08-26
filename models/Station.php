@@ -17,6 +17,9 @@ use Yii;
  */
 class Station extends \yii\db\ActiveRecord
 {
+    const POPSITE = 'popsite';
+    const POINT = 'point';
+
     /**
      * {@inheritdoc}
      */
@@ -28,9 +31,12 @@ class Station extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+
+
     public function rules()
     {
         return [
+            [['name', 'address','station_type',], 'required'],
             [['is_used'], 'integer'],
             [['name', 'address', 'station_type'], 'string', 'max' => 255],
         ];

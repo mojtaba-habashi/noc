@@ -47,7 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view} {update} {delete} {myButton}',  // the default buttons + your custom button
                 'buttons' => [
                     'myButton' => function($url, $model, $key) {     // render your custom button
-                        return "<span class='fa fa-book bg-red'>" . Html::a('Click me', ['site/index']) . "</span>";
+                        return "<span class='fa fa-book bg-red'>" . Html::a('Services', ['service/index']) . "</span>"
+                            ;
                     }
                 ]
             ]
