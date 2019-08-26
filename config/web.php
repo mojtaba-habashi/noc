@@ -69,7 +69,9 @@ $config = [
             ],
             'controllerMap' => [
                 'registration' => 'app\controllers\user\RegistrationController',
-                'customer' => 'app\controllers\user\CustomerController'
+                'customer' => 'app\controllers\user\CustomerController',
+                'station' => 'app\controllers\user\StationController'
+
             ],
         ],
     ],

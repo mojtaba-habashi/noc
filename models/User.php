@@ -11,7 +11,6 @@ use yii\web\Application as WebApplication;
 class User extends \dektrium\user\models\User
 {
 
-
     public function beforeSave($insert)
     {
         if ($insert) {

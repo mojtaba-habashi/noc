@@ -2,9 +2,10 @@
 
 namespace app\models;
 
+use app\models\User;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\User;
+
 
 /**
  * Usersearch represents the model behind the search form of `app\models\User`.
@@ -18,7 +19,7 @@ class SearchUser extends User
     {
         return [
             [['id', 'confirmed_at', 'blocked_at', 'created_at', 'updated_at', 'flags', 'last_login_at', 'is_admin'], 'integer'],
-            [['username', 'email', 'password_hash', 'auth_key', 'unconfirmed_email', 'registration_ip'], 'safe'],
+            [['username', 'email', 'password_hash', 'auth_key', 'unconfirmed_email', 'registration_ip',], 'safe'],
         ];
     }
 
@@ -40,10 +41,8 @@ class SearchUser extends User
      */
     public function search($params)
     {
+        $query=User::find()->where(['is_admin' => 0]);
 
-        $query = User::find();
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -51,10 +50,6 @@ class SearchUser extends User
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            $query->where('0=1');
-            return $dataProvider;
-        }
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -73,7 +68,11 @@ class SearchUser extends User
             ->andFilterWhere(['like', 'password_hash', $this->password_hash])
             ->andFilterWhere(['like', 'auth_key', $this->auth_key])
             ->andFilterWhere(['like', 'unconfirmed_email', $this->unconfirmed_email])
-            ->andFilterWhere(['like', 'registration_ip', $this->registration_ip]);
+            ->andFilterWhere(['like', 'registration_ip', $this->registration_ip])
+            ->andFilterWhere(['like', 'is_admin', $this->is_admin])
+        ;
+
+
 
         return $dataProvider;
     }

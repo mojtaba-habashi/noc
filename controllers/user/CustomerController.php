@@ -2,9 +2,11 @@
 
 namespace app\controllers\user;
 
+use app\models\Profile;
 use app\models\SearchUser;
 use Yii;
 use yii\base\Model;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -91,28 +93,41 @@ class CustomerController extends Controller
 
     public function actionCreate()
     {
-        $model = new User();
+        $user = new User();
+        $user->is_admin = 0;
+        $profile =new Profile();
+        if ($user->load(Yii::$app->request->post()) && $profile->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
 
-        if ($model->load(Yii::$app->request->post()) &&  $model->save()) {
-            $model->password=123;
-
-            return $this->redirect(['view', 'id' => $model->id]);
+                $user->generateUser($user, $profile);
+                $transaction->commit();
+            } catch (Exception $e){
+                $transaction->rollBack();
+                print_r($e->getMessage());
+                die();
+                return "error";
+            }
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'user' => $user,
+            'profile' => $profile,
         ]);
     }
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $user = $this->findModel($id);
+        $profile = $user->profile;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($user->load(Yii::$app->request->post()) && $profile->load(Yii::$app->request->post())) {
+            $user->save();
+            return $this->redirect(['view', 'id' => $user->id]);
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'user' => $user,
+            'profile' => $profile,
         ]);
     }
 
@@ -134,8 +149,9 @@ class CustomerController extends Controller
     }*/
     protected function findModel($id)
     {
-        if (($model = User::findOne($id)) !== null) {
+        if (((($model = User::findOne($id)) !== null) && ($profile = User::findOne($id)) !== null)) {
             return $model;
+            return $profile;
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
