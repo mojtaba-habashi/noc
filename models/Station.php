@@ -36,7 +36,7 @@ class Station extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'address','station_type',], 'required'],
+//            [['name', 'address','station_type',], 'required'],
             [['is_used'], 'integer'],
             [['name', 'address', 'station_type'], 'string', 'max' => 255],
         ];
@@ -59,8 +59,32 @@ class Station extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getServices()
+    public function getStations()
     {
         return $this->hasMany(Service::className(), ['station_id' => 'id']);
+    }
+
+    /**
+     * @param $serviceType
+     * @return array|\yii\db\ActiveRecord[]|null
+     */
+    public function getAjaxStations($serviceType)
+    {
+        $stations = null;
+        if ($serviceType == Service::ADSL) {
+            $stations = Station::find()
+                ->where(['and',
+                    ['station_type' => Station::POPSITE],
+                    ['is_used' => 0]])
+                ->orWhere(['station_type' => Station::POINT])
+                ->all();
+        } else {
+            $stations = Station::find()
+                ->where(['and',
+                    ['station_type' => Station::POPSITE],
+                    ['is_used' => 0]])
+                ->all();
+        }
+        return $stations;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace app\controllers\user;
 
+use app\models\Station;
 use Yii;
 use app\models\Service;
 use app\models\Servicesearch;
@@ -24,10 +25,10 @@ class ServiceController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['index'],
+                'only' => ['index', 'fetch-station'],
                 'rules' => [
                     [
-                        'actions' => ['index'],
+                        'actions' => ['index', 'fetch-station'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -43,17 +44,18 @@ class ServiceController extends Controller
     }
 
     /**
-     * Lists all Service models.
-     * @return mixed
+     * @param $customer_id
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex($customer_id)
     {
         $searchModel = new Servicesearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $customer_id);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'customer_id' => $customer_id,
         ]);
     }
 
@@ -71,21 +73,53 @@ class ServiceController extends Controller
     }
 
     /**
-     * Creates a new Service model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @param $customer_id
+     * @return string|\yii\web\Response
      */
-    public function actionCreate()
+    public function actionCreate($customer_id)
     {
-        $model = new Service();
+        $service = new Service();
+        $station = new Station();
+        if ($service->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $service->station_id = intval($service->station_id);
+                $service->user_id = $customer_id;
+                $station = Station::findOne($service->station_id);
+                $station->is_used = 1;
+                $station->save();
+                $service->save();
+                $transaction->commit();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+                return $this->redirect(['view', 'id' => $service->id]);
+            } catch (\Exception $exception) {
+                $transaction->rollBack();
+            }
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model' => $service,
+            'station' => $station,
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionFetchStation()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        if (Yii::$app->request->post() && $data = Yii::$app->request->post()) {
+            $serviceType = Yii::$app->request->post()['data'];
+            $station = new Station();
+            $stations = $station->getAjaxStations($serviceType);
+            $response = [];
+            foreach ($stations as $station) {
+                $response[$station->id] = $station->name;
+            }
+
+            return $response;
+        }
     }
 
     /**
@@ -99,8 +133,13 @@ class ServiceController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                $model->save();
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
+            Throw new \Exception("sadasdasdasd");
         }
 
         return $this->render('update', [
@@ -117,9 +156,11 @@ class ServiceController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        if ($this->findModel($id)->delete()) {
+            return $this->redirect(['index']);
+        }
 
-        return $this->redirect(['index']);
+        Throw new \Exception("sadasdasdasd");
     }
 
     /**

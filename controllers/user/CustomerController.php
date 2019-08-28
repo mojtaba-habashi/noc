@@ -23,36 +23,32 @@ class CustomerController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['index'],
                 'rules' => [
                     [
                         'actions' => ['index'],
                         'allow' => true,
                         'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->identity->is_admin == 0 ? false : true;
+                        }
+                    ],
+                    [
+                        'actions' => ['view'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->identity->is_admin == 0 ? false : true;
+                        }
+                    ],
+                    [
+                        'actions' => ['delete'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->identity->is_admin == 0 ? false : true;
+                        }
                     ],
                 ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
-    {
-        return [
-            'error' => [
-                'class' => 'yii\web\ErrorAction',
-            ],
-            'captcha' => [
-                'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
             ],
         ];
     }
@@ -105,8 +101,7 @@ class CustomerController extends Controller
             } catch (Exception $e){
                 $transaction->rollBack();
                 print_r($e->getMessage());
-                die();
-                return "error";
+
             }
         }
 
@@ -149,11 +144,9 @@ class CustomerController extends Controller
     }*/
     protected function findModel($id)
     {
-        if (((($model = User::findOne($id)) !== null) && ($profile = User::findOne($id)) !== null)) {
+        if (($model = User::findOne($id)) !== null) {
             return $model;
-            return $profile;
         }
-
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 

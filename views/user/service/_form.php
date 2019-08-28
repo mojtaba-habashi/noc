@@ -10,20 +10,18 @@ use app\models\Service as service;
 
 <div class="service-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin(['options' => [
+        'class' => 'comment-form',
+    ]]); ?>
 
     <?= $form->field($model, 'address')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'tel')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'service_type')->dropDownList( ['adsl' => service::ADSL, 'wireless' => service::WIRELESS])  ?>
+    <?= $form->field($model, 'service_type')->dropDownList(
+            [service::ADSL => service::ADSL, service::WIRELESS => service::WIRELESS],['id' => 'searchname']);?>
 
-    <?= $form->field($model, 'user_id')->textInput() ?>
-
-    <?= $form->field($model, 'station_id')->textInput() ?>
-
-    <?= $form->field($model, 'is_deleted')->hiddenInput()->label('') ?>
-
+    <?= $form->field($model, 'station_id' )->dropDownList([])->label('station');?>
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>

@@ -13,7 +13,7 @@ class m190823_210919_addForeignKeyToServiceTable extends Migration
     public function safeUp()
     {
         $this->addForeignKey(
-            'fk-service-user_id',
+            'fk_service_user_id_user',
             'service',
             'user_id',
             'user',

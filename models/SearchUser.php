@@ -41,7 +41,7 @@ class SearchUser extends User
      */
     public function search($params)
     {
-        $query=User::find()->where(['is_admin' => 0]);
+        $query = User::find()->where(['is_admin' => 0]);
 
 
         $dataProvider = new ActiveDataProvider([

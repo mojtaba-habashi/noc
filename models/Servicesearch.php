@@ -11,6 +11,8 @@ use app\models\Service;
  */
 class Servicesearch extends Service
 {
+    public $station_name;
+    public $customer_name;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +20,7 @@ class Servicesearch extends Service
     {
         return [
             [['id', 'user_id', 'station_id', 'is_deleted'], 'integer'],
-            [['service_type', 'address', 'tel'], 'safe'],
+            [['service_type', 'address', 'tel', 'station_name', 'customer_name'], 'safe'],
         ];
     }
 
@@ -32,17 +34,18 @@ class Servicesearch extends Service
     }
 
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
+     * @param $customer_id
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $customer_id)
     {
-        $query = Service::find();
+        $query = Service::find()
+            ->innerJoin('station', 'service.station_id = station.id')
+            ->innerJoin('user', 'service.user_id = user.id')
+            ->innerJoin('profile', 'profile.user_id = user.id')
+            ->where(['service.user_id' => $customer_id]);
 
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -51,8 +54,7 @@ class Servicesearch extends Service
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+
             return $dataProvider;
         }
 
@@ -62,11 +64,14 @@ class Servicesearch extends Service
             'user_id' => $this->user_id,
             'station_id' => $this->station_id,
             'is_deleted' => $this->is_deleted,
+
         ]);
 
         $query->andFilterWhere(['like', 'service_type', $this->service_type])
             ->andFilterWhere(['like', 'address', $this->address])
-            ->andFilterWhere(['like', 'tel', $this->tel]);
+            ->andFilterWhere(['like', 'tel', $this->tel])
+            ->andFilterWhere(['like', 'station.name', $this->station_name])
+            ->andFilterWhere(['like', 'profile.name', $this->customer_name]);
 
         return $dataProvider;
     }

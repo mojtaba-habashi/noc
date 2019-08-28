@@ -7,6 +7,8 @@ use yii\base\Model;
 
 /**
  * ContactForm is the model behind the contact form.
+ * Class ContactForm
+ * @package app\models
  */
 class ContactForm extends Model
 {

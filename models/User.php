@@ -103,11 +103,12 @@ class User extends \dektrium\user\models\User
     public function generateUser ($user, $profile)
     {
         if ($user->save()) {
-            $new_profile = \app\models\Profile::find()->where(['user_id' => $user->id])->one();
-            $new_profile->name = $profile->name;
-            $new_profile->family = $profile->family;
-            $new_profile->number = $profile->number;
-            if (!$new_profile->save()) {
+//            $newProfile = \app\models\Profile::find()->where(['user_id' => $user->id])->one();
+            $newProfile = $user->profile;
+            $newProfile->name = $profile->name;
+            $newProfile->family = $profile->family;
+            $newProfile->number = $profile->number;
+            if (!$newProfile->save()) {
                 throw new Exception('can not save profile');
             }
         } else {
